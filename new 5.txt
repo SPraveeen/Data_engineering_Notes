@@ -1,0 +1,162 @@
+🔹 Task 1: Familiarize Yourself with the Dataset
+1. Display First 5 Rows
+df.head()
+2. Display Data Types
+df.dtypes
+3. Check for Missing Values
+df.isnull().sum()
+4. Check for Duplicate Rows
+df.duplicated().sum()
+5. Correlation Matrix
+df.corr()
+🔎 Interpretation for Management:
+
+No missing or duplicate data ensures reliable analysis.
+
+The correlation matrix helps identify strong relationships between variables.
+
+Pay close attention to correlations with MEDV (home value).
+
+🔹 Task 2: Descriptive Statistics & Visualizations
+1. Descriptive Statistics
+df.describe()
+
+📌 Interpretation:
+
+Shows mean, median, min, max, and spread of values.
+
+Helps understand general housing price distribution.
+
+2. Boxplot for MEDV
+import seaborn as sns
+sns.boxplot(y=df["MEDV"])
+
+📌 Interpretation:
+
+Shows median home value.
+
+Identifies outliers.
+
+If skewed → housing prices are not evenly distributed.
+
+3. Bar Plot for CHAS
+sns.countplot(x="CHAS", data=df)
+
+📌 Interpretation:
+
+Shows how many houses are near the Charles River.
+
+Usually, far fewer homes are bounded by the river.
+
+4. Discretize AGE into 3 Groups & Boxplot
+df["AGE_GROUP"] = pd.cut(df["AGE"], bins=3)
+
+sns.boxplot(x="AGE_GROUP", y="MEDV", data=df)
+
+📌 Interpretation:
+
+Compare median prices across older vs newer homes.
+
+Check if older homes (higher AGE) tend to have lower or higher values.
+
+5. Scatter Plot: NOX vs INDUS
+sns.scatterplot(x="INDUS", y="NOX", data=df)
+
+📌 Interpretation:
+
+Upward trend → Higher industrial areas linked to higher pollution.
+
+Likely positive correlation.
+
+6. Histogram for PTRATIO
+sns.histplot(df["PTRATIO"], bins=20)
+
+📌 Interpretation:
+
+Shows distribution of pupil-teacher ratios.
+
+Helps understand school quality spread across towns.
+
+🔹 Task 3: Statistical Tests
+1️⃣ Levene’s Test (Equality of Variance)
+from scipy.stats import levene
+
+levene(df[df["CHAS"]==0]["MEDV"],
+       df[df["CHAS"]==1]["MEDV"])
+
+📌 Interpretation:
+
+p > 0.05 → Equal variances
+
+p < 0.05 → Variances differ
+
+Management Meaning:
+Checks if price variability differs between river and non-river homes.
+
+2️⃣ T-Test (Difference in MEDV by CHAS)
+from scipy.stats import ttest_ind
+
+ttest_ind(df[df["CHAS"]==0]["MEDV"],
+          df[df["CHAS"]==1]["MEDV"])
+
+📌 Interpretation:
+
+p < 0.05 → Significant price difference
+
+p > 0.05 → No significant difference
+
+Management Meaning:
+Determines if being near the Charles River significantly impacts house prices.
+
+3️⃣ ANOVA (MEDV across AGE Groups)
+from scipy.stats import f_oneway
+
+f_oneway(df[df["AGE_GROUP"]==df["AGE_GROUP"].unique()[0]]["MEDV"],
+         df[df["AGE_GROUP"]==df["AGE_GROUP"].unique()[1]]["MEDV"],
+         df[df["AGE_GROUP"]==df["AGE_GROUP"].unique()[2]]["MEDV"])
+
+📌 Interpretation:
+
+p < 0.05 → At least one age group differs in price
+
+p > 0.05 → No significant difference
+
+Management Meaning:
+Shows whether house age significantly affects value.
+
+4️⃣ Pearson Correlation (NOX vs INDUS)
+from scipy.stats import pearsonr
+
+pearsonr(df["NOX"], df["INDUS"])
+
+📌 Interpretation:
+
+r close to +1 → Strong positive relationship
+
+p < 0.05 → Statistically significant
+
+Management Meaning:
+Industrial areas tend to have higher pollution.
+
+5️⃣ Linear Regression: DIS → MEDV
+import statsmodels.api as sm
+
+X = sm.add_constant(df["DIS"])
+model = sm.OLS(df["MEDV"], X).fit()
+model.summary()
+
+📌 Key Interpretation Points for Management:
+
+Slope (DIS coefficient):
+
+Positive → Houses farther from employment centers have higher value.
+
+Negative → Houses farther away are cheaper.
+
+p-value:
+
+< 0.05 → Distance significantly affects price.
+
+R²:
+
+Shows how much of price variation is explained by distance.
